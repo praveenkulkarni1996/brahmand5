@@ -1,0 +1,9 @@
+[init]
+	defaultBranch = main
+
+[user]
+	email = praveenkulkarni1996@gmail@com
+	name = Praveen Kulkarni
+
+[commit]
+	verbose = true
