@@ -2,9 +2,17 @@
 
 CLI password manager. Use `--db /path/to/vault.db` to specify vault location; otherwise a default path is used.
 
-Run examples:
+## Setup
+
+First, synchronize dependencies using `uv`:
 
 ```bash
-python -m apps.password_manager.main init --db ./vault.db
-python -m apps.password_manager.main add "example.com" "me@example.com" --db ./vault.db
+uv sync
+```
+
+## Run examples:
+
+```bash
+uv run python -m apps.password_manager.main init --db ./vault.db
+uv run python -m apps.password_manager.main add "example.com" "me@example.com" --db ./vault.db
 ```
