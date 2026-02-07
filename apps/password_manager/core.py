@@ -30,11 +30,13 @@ def add_entry(db_path: Path, key: bytes, service: str, username: str, password: 
     cur = conn.cursor()
     entry_id = str(uuid.uuid4())
     now = datetime.utcnow().isoformat()
+    enc_service = crypto.encrypt(key, service.encode("utf-8"))
+    enc_username = crypto.encrypt(key, username.encode("utf-8"))
     enc_password = crypto.encrypt(key, password.encode("utf-8"))
     enc_notes = crypto.encrypt(key, notes.encode("utf-8")) if notes else None
     cur.execute(
         "INSERT INTO entries(id, service, username, password, notes, created_at, updated_at) VALUES(?,?,?,?,?,?,?)",
-        (entry_id, service, username, enc_password, enc_notes, now, now),
+        (entry_id, enc_service, enc_username, enc_password, enc_notes, now, now),
     )
     conn.commit()
     conn.close()
@@ -49,7 +51,9 @@ def get_entry(db_path: Path, key: bytes, entry_id: str):
     conn.close()
     if not row:
         return None
-    id_, service, username, enc_password, enc_notes, created_at, updated_at = row
+    id_, enc_service, enc_username, enc_password, enc_notes, created_at, updated_at = row
+    service = crypto.decrypt(key, enc_service).decode("utf-8")
+    username = crypto.decrypt(key, enc_username).decode("utf-8")
     password = crypto.decrypt(key, enc_password).decode("utf-8")
     notes = crypto.decrypt(key, enc_notes).decode("utf-8") if enc_notes else None
     return {
@@ -63,12 +67,49 @@ def get_entry(db_path: Path, key: bytes, entry_id: str):
     }
 
 
-def list_entries(db_path: Path) -> List[dict]:
+def list_entries_preview(db_path: Path) -> List[dict]:
+    """List entries with encrypted service/username (preview mode, no decryption)."""
     conn = storage.open_connection(db_path)
     cur = conn.cursor()
     cur.execute("SELECT id, service, username, created_at, updated_at FROM entries ORDER BY created_at DESC")
     rows = cur.fetchall()
     conn.close()
+    
     return [
-        {"id": r[0], "service": r[1], "username": r[2], "created_at": r[3], "updated_at": r[4]} for r in rows
+        {
+            "id": r[0],
+            "service": r[1].hex() if r[1] else None,
+            "username": r[2].hex() if r[2] else None,
+            "created_at": r[3],
+            "updated_at": r[4],
+            "encrypted": True,
+        }
+        for r in rows
     ]
+
+
+def list_entries_decrypted(db_path: Path, key: bytes) -> List[dict]:
+    """List entries with decrypted service/username (requires master password key)."""
+    conn = storage.open_connection(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT id, service, username, created_at, updated_at FROM entries ORDER BY created_at DESC")
+    rows = cur.fetchall()
+    conn.close()
+    
+    result = []
+    for r in rows:
+        try:
+            service = crypto.decrypt(key, r[1]).decode("utf-8")
+            username = crypto.decrypt(key, r[2]).decode("utf-8")
+        except Exception:
+            # Decryption failed, skip
+            continue
+        result.append({
+            "id": r[0],
+            "service": service,
+            "username": username,
+            "created_at": r[3],
+            "updated_at": r[4],
+        })
+    
+    return result

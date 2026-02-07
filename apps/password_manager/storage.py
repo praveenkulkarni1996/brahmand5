@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS metadata (
 
 CREATE TABLE IF NOT EXISTS entries (
     id TEXT PRIMARY KEY,
-    service TEXT NOT NULL,
-    username TEXT NOT NULL,
+    service BLOB NOT NULL,
+    username BLOB NOT NULL,
     password BLOB NOT NULL,
     notes BLOB,
     created_at TEXT NOT NULL,
