@@ -2,6 +2,29 @@
 
 CLI password manager. Use `--db /path/to/vault.db` to specify vault location; otherwise a default path is used.
 
+## Commands
+
+### `generate`
+
+Generates a strong, random password. The generated password is **always displayed** in the console.
+
+-   `--length`, `-l`: Specifies the length of the password (default: 20).
+-   `--include-symbols`, `-s`: Includes a restricted set of symbols (`@#$%`) in the password. Ambiguous characters (like 'l', 'I', '0', 'O', '1', 'o') are excluded by default.
+
+**Note:** The generated password is not automatically saved to your vault. You must use the `add` command if you wish to store it.
+
+**Examples:**
+
+*   Generate a default 20-character password:
+    ```bash
+    uv run python -m apps.password_manager.main generate
+    ```
+
+*   Generate a 15-character password with symbols:
+    ```bash
+    uv run python -m apps.password_manager.main generate --length 15 --include-symbols
+    ```
+
 ## Setup
 
 First, synchronize dependencies using `uv`:

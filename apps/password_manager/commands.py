@@ -1,7 +1,7 @@
 
 import typer
 from pathlib import Path
-from . import core, storage
+from . import core, storage, crypto
 
 app = typer.Typer()
 
@@ -73,3 +73,13 @@ def list(
         # Show decrypted output
         for r in rows:
             typer.echo(f"{r['id']}  {r['service']}  {r['username']}")
+
+
+@app.command()
+def generate(
+    length: int = typer.Option(20, "--length", "-l", help="Length of the password"),
+    include_symbols: bool = typer.Option(False, "--include-symbols", "-s", help="Include symbols (@#$%) in the password"),
+):
+    """Generate a strong, random password."""
+    password = crypto.generate_strong_password(length=length, include_symbols=include_symbols)
+    typer.echo(f"Generated password: {password}")
