@@ -56,6 +56,6 @@ struct DropGuard {
 impl Drop for DropGuard {
     fn drop(&mut self) {
         // Use a blocking kill here as drop is not async
-        let _ = self.child.kill();
+        std::mem::drop(self.child.kill());
     }
 }

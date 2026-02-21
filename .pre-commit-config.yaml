@@ -1,0 +1,30 @@
+repos:
+  # Rust linting (clippy) – most important addition for quality
+  - repo: local
+    hooks:
+      - id: clippy
+        name: cargo clippy
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        pass_filenames: false
+        types: [rust]
+
+  # Optional but very useful: compile-time check (fast fail on type errors)
+  - repo: local
+    hooks:
+      - id: cargo-check
+        name: cargo check
+        entry: cargo check --all-targets --all-features
+        language: system
+        pass_filenames: false
+        types: [rust]
+
+  # Optional: run tests (can be slow – consider moving to pre-push if > ~10s)
+  - repo: local
+    hooks:
+      - id: cargo-test
+        name: cargo test
+        entry: cargo test --all-targets --all-features
+        language: system
+        pass_filenames: false
+        types: [rust]
