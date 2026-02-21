@@ -1,4 +1,3 @@
-
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +8,7 @@ from . import crypto, storage
 
 def init_vault(db_path: Path, master_password: str) -> None:
     import os
+
     salt = os.urandom(16)
     master_hash = crypto.hash_master_password(master_password)
     storage.initialize_db(db_path, salt, master_hash)
@@ -25,7 +25,14 @@ def unlock_vault(db_path: Path, master_password: str) -> Optional[bytes]:
     return key
 
 
-def add_entry(db_path: Path, key: bytes, service: str, username: str, password: str, notes: Optional[str]) -> str:
+def add_entry(
+    db_path: Path,
+    key: bytes,
+    service: str,
+    username: str,
+    password: str,
+    notes: Optional[str],
+) -> str:
     conn = storage.open_connection(db_path)
     cur = conn.cursor()
     entry_id = str(uuid.uuid4())
@@ -46,12 +53,17 @@ def add_entry(db_path: Path, key: bytes, service: str, username: str, password: 
 def get_entry(db_path: Path, key: bytes, entry_id: str):
     conn = storage.open_connection(db_path)
     cur = conn.cursor()
-    cur.execute("SELECT id, service, username, password, notes, created_at, updated_at FROM entries WHERE id=?", (entry_id,))
+    cur.execute(
+        "SELECT id, service, username, password, notes, created_at, updated_at FROM entries WHERE id=?",
+        (entry_id,),
+    )
     row = cur.fetchone()
     conn.close()
     if not row:
         return None
-    id_, enc_service, enc_username, enc_password, enc_notes, created_at, updated_at = row
+    id_, enc_service, enc_username, enc_password, enc_notes, created_at, updated_at = (
+        row
+    )
     service = crypto.decrypt(key, enc_service).decode("utf-8")
     username = crypto.decrypt(key, enc_username).decode("utf-8")
     password = crypto.decrypt(key, enc_password).decode("utf-8")
@@ -71,10 +83,12 @@ def list_entries_preview(db_path: Path) -> List[dict]:
     """List entries with encrypted service/username (preview mode, no decryption)."""
     conn = storage.open_connection(db_path)
     cur = conn.cursor()
-    cur.execute("SELECT id, service, username, created_at, updated_at FROM entries ORDER BY created_at DESC")
+    cur.execute(
+        "SELECT id, service, username, created_at, updated_at FROM entries ORDER BY created_at DESC"
+    )
     rows = cur.fetchall()
     conn.close()
-    
+
     return [
         {
             "id": r[0],
@@ -92,10 +106,12 @@ def list_entries_decrypted(db_path: Path, key: bytes) -> List[dict]:
     """List entries with decrypted service/username (requires master password key)."""
     conn = storage.open_connection(db_path)
     cur = conn.cursor()
-    cur.execute("SELECT id, service, username, created_at, updated_at FROM entries ORDER BY created_at DESC")
+    cur.execute(
+        "SELECT id, service, username, created_at, updated_at FROM entries ORDER BY created_at DESC"
+    )
     rows = cur.fetchall()
     conn.close()
-    
+
     result = []
     for r in rows:
         try:
@@ -104,12 +120,14 @@ def list_entries_decrypted(db_path: Path, key: bytes) -> List[dict]:
         except Exception:
             # Decryption failed, skip
             continue
-        result.append({
-            "id": r[0],
-            "service": service,
-            "username": username,
-            "created_at": r[3],
-            "updated_at": r[4],
-        })
-    
+        result.append(
+            {
+                "id": r[0],
+                "service": service,
+                "username": username,
+                "created_at": r[3],
+                "updated_at": r[4],
+            }
+        )
+
     return result

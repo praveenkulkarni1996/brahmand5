@@ -15,7 +15,7 @@ def test_add_and_get_encrypted_fields(tmp_path):
     db = tmp_path / "vault.db"
     core.init_vault(db, "master-pass")
     key = core.unlock_vault(db, "master-pass")
-    
+
     # Add entry
     entry_id = core.add_entry(
         db,
@@ -23,10 +23,10 @@ def test_add_and_get_encrypted_fields(tmp_path):
         service="GitHub",
         username="alice",
         password="secret123",
-        notes="Personal account"
+        notes="Personal account",
     )
     assert entry_id
-    
+
     # Retrieve and verify all fields are decrypted
     entry = core.get_entry(db, key, entry_id)
     assert entry is not None
@@ -41,7 +41,7 @@ def test_wrong_key_cannot_decrypt(tmp_path):
     db = tmp_path / "vault.db"
     core.init_vault(db, "master-pass")
     key = core.unlock_vault(db, "master-pass")
-    
+
     # Add entry
     entry_id = core.add_entry(
         db,
@@ -49,13 +49,13 @@ def test_wrong_key_cannot_decrypt(tmp_path):
         service="GitHub",
         username="alice",
         password="secret123",
-        notes="Personal account"
+        notes="Personal account",
     )
-    
+
     # Try to decrypt with different key
     wrong_key = core.unlock_vault(db, "wrong-pass")
     assert wrong_key is None
-    
+
     # Get entry with correct key should work
     entry = core.get_entry(db, key, entry_id)
     assert entry is not None
@@ -67,17 +67,12 @@ def test_list_entries_preview_returns_encrypted(tmp_path):
     db = tmp_path / "vault.db"
     core.init_vault(db, "master-pass")
     key = core.unlock_vault(db, "master-pass")
-    
+
     # Add entry
     entry_id = core.add_entry(
-        db,
-        key,
-        service="GitHub",
-        username="alice",
-        password="secret123",
-        notes=None
+        db, key, service="GitHub", username="alice", password="secret123", notes=None
     )
-    
+
     # List with preview mode
     rows = core.list_entries_preview(db)
     assert len(rows) == 1
@@ -96,35 +91,25 @@ def test_list_entries_decrypted_returns_plaintext(tmp_path):
     db = tmp_path / "vault.db"
     core.init_vault(db, "master-pass")
     key = core.unlock_vault(db, "master-pass")
-    
+
     # Add entries
     entry1_id = core.add_entry(
-        db,
-        key,
-        service="GitHub",
-        username="alice",
-        password="secret1",
-        notes=None
+        db, key, service="GitHub", username="alice", password="secret1", notes=None
     )
     entry2_id = core.add_entry(
-        db,
-        key,
-        service="GitLab",
-        username="bob",
-        password="secret2",
-        notes=None
+        db, key, service="GitLab", username="bob", password="secret2", notes=None
     )
-    
+
     # List with decryption
     rows = core.list_entries_decrypted(db, key)
     assert len(rows) == 2
-    
+
     # Entries should be sorted by created_at DESC, so entry2 first
     assert rows[0]["id"] == entry2_id
     assert rows[0]["service"] == "GitLab"
     assert rows[0]["username"] == "bob"
     assert "encrypted" not in rows[0]
-    
+
     assert rows[1]["id"] == entry1_id
     assert rows[1]["service"] == "GitHub"
     assert rows[1]["username"] == "alice"
@@ -135,16 +120,11 @@ def test_add_entry_without_notes(tmp_path):
     db = tmp_path / "vault.db"
     core.init_vault(db, "master-pass")
     key = core.unlock_vault(db, "master-pass")
-    
+
     entry_id = core.add_entry(
-        db,
-        key,
-        service="Twitter",
-        username="alice",
-        password="secret123",
-        notes=None
+        db, key, service="Twitter", username="alice", password="secret123", notes=None
     )
-    
+
     entry = core.get_entry(db, key, entry_id)
     assert entry["notes"] is None
     assert entry["service"] == "Twitter"
@@ -156,24 +136,22 @@ def test_multiple_entries_isolation(tmp_path):
     db = tmp_path / "vault.db"
     core.init_vault(db, "master-pass")
     key = core.unlock_vault(db, "master-pass")
-    
+
     # Add 3 entries
     entries = []
-    for i, (service, username) in enumerate([
-        ("GitHub", "alice"),
-        ("GitLab", "bob"),
-        ("Bitbucket", "charlie")
-    ]):
+    for i, (service, username) in enumerate(
+        [("GitHub", "alice"), ("GitLab", "bob"), ("Bitbucket", "charlie")]
+    ):
         entry_id = core.add_entry(
             db,
             key,
             service=service,
             username=username,
             password=f"password{i}",
-            notes=f"Note for {service}"
+            notes=f"Note for {service}",
         )
         entries.append((entry_id, service, username))
-    
+
     # Retrieve each entry and verify correctness
     for entry_id, expected_service, expected_username in entries:
         entry = core.get_entry(db, key, entry_id)

@@ -1,4 +1,3 @@
-
 import typer
 from pathlib import Path
 from . import core, storage, crypto
@@ -10,7 +9,9 @@ app = typer.Typer()
 def init(db: str = typer.Option(None, "--db", help="Path to vault DB")):
     """Initialize a new vault"""
     path = storage.resolve_db_path(db)
-    master = typer.prompt("Choose a master password", hide_input=True, confirmation_prompt=True)
+    master = typer.prompt(
+        "Choose a master password", hide_input=True, confirmation_prompt=True
+    )
     core.init_vault(path, master)
     typer.echo(f"Initialized vault at {path}")
 
@@ -53,7 +54,9 @@ def get(entry_id: str, db: str = typer.Option(None, "--db", help="Path to vault 
 @app.command()
 def list(
     db: str = typer.Option(None, "--db", help="Path to vault DB"),
-    preview: bool = typer.Option(False, "--preview", help="Show encrypted fields without decryption"),
+    preview: bool = typer.Option(
+        False, "--preview", help="Show encrypted fields without decryption"
+    ),
 ):
     """List entries"""
     path = storage.resolve_db_path(db)
@@ -62,12 +65,14 @@ def list(
     if not key:
         typer.echo("Invalid master password", err=True)
         raise typer.Exit(code=1)
-    
+
     if preview:
         rows = core.list_entries_preview(path)
         # Show encrypted output
         for r in rows:
-            typer.echo(f"{r['id']}  service={r['service'][:16]}...  username={r['username'][:16]}...")
+            typer.echo(
+                f"{r['id']}  service={r['service'][:16]}...  username={r['username'][:16]}..."
+            )
     else:
         rows = core.list_entries_decrypted(path, key)
         # Show decrypted output
@@ -78,8 +83,12 @@ def list(
 @app.command()
 def generate(
     length: int = typer.Option(20, "--length", "-l", help="Length of the password"),
-    include_symbols: bool = typer.Option(False, "--include-symbols", "-s", help="Include symbols (@#$%) in the password"),
+    include_symbols: bool = typer.Option(
+        False, "--include-symbols", "-s", help="Include symbols (@#$%) in the password"
+    ),
 ):
     """Generate a strong, random password."""
-    password = crypto.generate_strong_password(length=length, include_symbols=include_symbols)
+    password = crypto.generate_strong_password(
+        length=length, include_symbols=include_symbols
+    )
     typer.echo(f"Generated password: {password}")

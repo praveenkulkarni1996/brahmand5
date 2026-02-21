@@ -62,6 +62,7 @@ _UPPERCASE = "ABCDEFGHJKLMNPQRSTUVWXYZ"  # Excludes I, O
 _DIGITS = "23456789"  # Excludes 0, 1
 _SYMBOLS = "@#$%"  # Restricted symbol set
 
+
 def generate_strong_password(length: int = 20, include_symbols: bool = False) -> str:
     """
     Generates a cryptographically strong password.
@@ -102,4 +103,3 @@ def generate_strong_password(length: int = 20, include_symbols: bool = False) ->
     secrets.SystemRandom().shuffle(password_chars)
 
     return "".join(password_chars)
-

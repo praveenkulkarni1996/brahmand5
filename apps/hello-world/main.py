@@ -20,9 +20,9 @@ def main():
         "--url",
         type=str,
         default="https://www.example.com",
-        help="URL to fetch (default: https://www.example.com)"
+        help="URL to fetch (default: https://www.example.com)",
     )
-    
+
     args = parser.parse_args()
     fetch_example(args.url)
 

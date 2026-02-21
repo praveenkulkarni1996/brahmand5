@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 
-SCHEMA = '''
+SCHEMA = """
 CREATE TABLE IF NOT EXISTS metadata (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     salt BLOB NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS entries (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
-'''
+"""
 
 
 def resolve_db_path(cli_db: Optional[str]) -> Path:
@@ -62,7 +62,10 @@ def open_connection(path: Path) -> sqlite3.Connection:
 def initialize_db(path: Path, salt: bytes, master_hash: str) -> None:
     conn = open_connection(path)
     cur = conn.cursor()
-    cur.execute("INSERT OR REPLACE INTO metadata(id, salt, master_hash) VALUES(1, ?, ?)", (salt, master_hash))
+    cur.execute(
+        "INSERT OR REPLACE INTO metadata(id, salt, master_hash) VALUES(1, ?, ?)",
+        (salt, master_hash),
+    )
     conn.commit()
     conn.close()
 
@@ -74,4 +77,3 @@ def read_metadata(path: Path):
     row = cur.fetchone()
     conn.close()
     return row if row else None
-
