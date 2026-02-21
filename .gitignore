@@ -63,8 +63,11 @@ venv.bak/
 .tox/
 htmlcov/
 
-# IDE
-.vscode/
+# Visual Studio Code Preferences
+.vscode/*
+!.vscode/extensions.json
+
+# Other Editors/IDEs
 .idea/
 *.swp
 *.swo
