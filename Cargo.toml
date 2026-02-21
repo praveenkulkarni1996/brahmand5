@@ -1,5 +1,5 @@
 [workspace]
-members = ["apps/hello-rust"]
+members = ["apps/greet","apps/hello-rust"]
 resolver = "3"
 
 [workspace.package]
