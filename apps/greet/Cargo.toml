@@ -8,7 +8,13 @@ tokio = { version = "1.36", features = ["macros", "rt-multi-thread"] }
 tonic = { version = "0.11", features = ["codegen"] }
 prost = "0.12"
 futures = "0.3"
+clap = { version = "4", features = ["derive"] }
 
 [build-dependencies]
 tonic-build = { version = "0.11", features = ["prost"] }
 prost-build = "0.12"
+
+[dev-dependencies]
+tokio = { version = "1.36", features = ["macros", "rt-multi-thread", "process"] }
+tonic = { version = "0.11", features = ["codegen"] }
+prost = "0.12"

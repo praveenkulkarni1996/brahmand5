@@ -1,9 +1,17 @@
 use tonic::{transport::Server, Request, Response, Status};
+use clap::Parser;
 
 use greet::{greeter_server::{Greeter, GreeterServer}, GreetRequest, GreetResponse};
 
 pub mod greet {
     tonic::include_proto!("greet"); // The string "greet" here should match the package name in your .proto file
+}
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[arg(long, default_value_t = 50051)]
+    port: u16,
 }
 
 #[derive(Debug, Default)]
@@ -27,7 +35,8 @@ impl Greeter for MyGreeter {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse()?;
+    let cli = Cli::parse();
+    let addr = format!("[::1]:{}", cli.port).parse()?;
     let greeter = MyGreeter::default();
 
     println!("GreeterServer listening on {}", addr);
