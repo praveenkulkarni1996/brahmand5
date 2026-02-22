@@ -66,3 +66,5 @@ podman run \
   "message": "hello"
 }
 ```
+The `greet` container image is available on GitHub Container Registry: `ghcr.io/praveenkulkarni1996/brahmand5/greet:0.1.0`.
+You can find it here: [GitHub Packages - greet](https://github.com/users/praveenkulkarni1996/packages/container/package/brahmand5%2Fgreet)
