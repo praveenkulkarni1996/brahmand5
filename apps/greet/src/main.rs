@@ -12,6 +12,8 @@ pub mod greet {
 struct Cli {
     #[arg(long, default_value_t = 50051)]
     port: u16,
+    #[arg(long, default_value_t = String::from("0.0.0.0"))]
+    ip: String,
 }
 
 #[derive(Debug, Default)]
@@ -36,7 +38,7 @@ impl Greeter for MyGreeter {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
-    let addr = format!("[::1]:{}", cli.port).parse()?;
+    let addr = format!("{}:{}", cli.ip, cli.port).parse()?;
     let greeter = MyGreeter::default();
 
     println!("GreeterServer listening on {}", addr);

@@ -14,10 +14,12 @@ async fn test_say_hello() -> Result<(), Box<dyn std::error::Error>> {
     let port = listener.local_addr()?.port();
     drop(listener); // Release the port so the server can bind to it
 
-    let server_address = format!("http://[::1]:{}", port);
+    let server_address = format!("http://127.0.0.1:{}", port);
 
     // 1. Spawn server process
     let server_process = Command::new(env!("CARGO_BIN_EXE_greet"))
+        .arg("--ip") // Pass the ip argument
+        .arg("127.0.0.1") // Set ip to 127.0.0.1
         .arg("--port") // Pass the port argument
         .arg(port.to_string()) // Convert port to string
         .stdout(std::process::Stdio::null()) // Suppress server output
