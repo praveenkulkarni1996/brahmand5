@@ -23,9 +23,9 @@ To build and run the server:
     ```
 3.  Run the server:
     ```bash
-    cargo run
+    cargo run -- --ip 0.0.0.0 --port 50051
     ```
-    The server will start and listen on `[::1]:50051`.
+    The server will start and listen on `0.0.0.0:50051` by default, or the IP and port specified.
 
 ## Testing
 
@@ -34,12 +34,34 @@ You can test the server using `grpcurl`, a command-line tool for interacting wit
 Assuming `grpcurl` is installed, open a new terminal and run the following command while the server is running:
 
 ```bash
-grpcurl -plaintext -proto proto/greet.proto -d '{}' "[::1]:50051" greet.Greeter/SayHello
+grpcurl -plaintext -proto proto/greet.proto -d '{}' "127.0.0.1:50051" greet.Greeter/SayHello
 ```
 
 ### Expected Output
 
 ```json
+{
+  "message": "hello"
+}
+```
+
+# Scratchpad
+
+```
+podman run                          \
+    --rm                            \
+    --detach                        \
+    --name greet-server             \
+    --publish 127.0.0.1:8888:8888   \
+    -it                             \
+    localhost/greet:0.1.0           \
+    ./greet --ip 0.0.0.0 --port 8888
+
+
+# Client running outside
+
+```
+❯ grpcurl -plaintext -proto apps/greet/proto/greet.proto -d '{}' '127.0.0.1:8888' greet.Greeter/SayHello
 {
   "message": "hello"
 }
