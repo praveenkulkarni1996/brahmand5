@@ -48,14 +48,14 @@ grpcurl -plaintext -proto proto/greet.proto -d '{}' "127.0.0.1:50051" greet.Gree
 # Scratchpad
 
 ```
-podman run                          \
+podman run \
     --rm                            \
     --detach                        \
     --name greet-server             \
     --publish 127.0.0.1:8888:8888   \
     -it                             \
     localhost/greet:0.1.0           \
-    ./greet --ip 0.0.0.0 --port 8888
+    --ip 0.0.0.0 --port 8888
 
 
 # Client running outside

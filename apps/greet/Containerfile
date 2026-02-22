@@ -3,9 +3,41 @@
 # Usage
 # podman build --file apps/greet/Containerfile -t greet:0.1.0 .
 
-# === Stage 1: just your already-built binary ===
-# (you can skip this if you want to build inside Docker, but since you already have the binary...)
-FROM scratch AS binary-source
+# === Stage 1: Build the Rust binary ===
+FROM docker.io/library/rust:1.93.1-slim-bullseye AS builder
+WORKDIR /app
 
-# Copy the compiled binary
-COPY ./target/x86_64-unknown-linux-musl/release/greet /greet
+# Install musl-tools for static linking
+RUN apt-get update && apt-get install -y musl-tools protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the target for musl
+RUN rustup target add x86_64-unknown-linux-musl
+
+# Copy only the Cargo files to leverage Docker cache
+COPY Cargo.toml ./
+# This step is crucial for caching dependencies if Cargo.toml/lock don't change
+# The `|| true` prevents build failure if the proto definitions are not yet compiled
+RUN mkdir -p src/proto && \
+    echo "fn main() {println!(\"hello\");}" > src/main.rs && \
+    cargo build --release --target x86_64-unknown-linux-musl --bin greet || true
+
+# Copy source code and build
+COPY build.rs ./
+COPY proto ./proto
+COPY src ./src
+
+# Build the release binary
+RUN cargo build --release --target x86_64-unknown-linux-musl --bin greet
+
+# === Stage 2: Create a minimal runtime image ===
+FROM scratch AS runtime
+WORKDIR /
+EXPOSE 50051
+
+# Copy the compiled binary from the builder stage
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/greet /greet
+
+# Set the entrypoint to the compiled binary
+ENTRYPOINT ["/greet"]
+# CMD is explicitly omitted as per user's instruction
